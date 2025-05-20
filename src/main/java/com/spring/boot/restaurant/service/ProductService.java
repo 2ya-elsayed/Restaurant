@@ -29,6 +29,14 @@ public interface ProductService {
     ProductDto saveProduct(ProductDto productDto);
 
     /**
+     * Save a list of new products.
+     *
+     * @param productDtoList the list of product data to save
+     * @return the list of saved product DTOs
+     */
+    List<ProductDto> saveProductList(List<ProductDto> productDtoList);
+
+    /**
      * Update an existing product.
      *
      * @param productDto the updated product data

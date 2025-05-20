@@ -18,4 +18,6 @@ public interface ProductRepo extends JpaRepository<Product, Long> {
 //            "OR LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Product> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String keyword1, String keyword2);
 
+    boolean existsByNameAndCategoryId(String name, Long categoryId);
+
 }

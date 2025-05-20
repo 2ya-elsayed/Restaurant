@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +41,23 @@ public class CategoryServiceImpl implements CategoryService {
         }
         Category category = categoryMapper.toEntity(categoryDto);
         return categoryMapper.toDto(categoryRepo.save(category));
+    }
+
+    @Override
+    public List<CategoryDto> saveCategoryList(List<CategoryDto> categoryDtoList) {
+        if (categoryDtoList == null || categoryDtoList.isEmpty()) {
+            throw new BadRequestException("Category list must not be null or empty");
+        }
+
+        for (CategoryDto dto : categoryDtoList) {
+            if (dto.getName() == null || dto.getName().isBlank()) {
+                throw new BadRequestException("Each category must have a non-empty name");
+            }
+        }
+
+        List<Category> categories = categoryMapper.toEntityList(categoryDtoList);
+        List<Category> savedCategories = categoryRepo.saveAll(categories);
+        return categoryMapper.toDtoList(savedCategories);
     }
 
     @Override

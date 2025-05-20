@@ -30,6 +30,11 @@ public class ProductController {
         return ResponseEntity.ok(productService.saveProduct(productDto));
     }
 
+    @PostMapping("/createList")
+    public ResponseEntity<List<ProductDto>> createProductList(@RequestBody List<ProductDto> productDtoList) {
+        return ResponseEntity.ok(productService.saveProductList(productDtoList));
+    }
+
     @PutMapping("/update")
     public ResponseEntity<ProductDto> updateProduct(@RequestBody ProductDto productDto) {
         return ResponseEntity.ok(productService.updateProduct(productDto));

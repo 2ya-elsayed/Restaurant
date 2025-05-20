@@ -25,9 +25,14 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.getCategoryById(id));
     }
 
-    @PostMapping("/create")
+    @PostMapping("/createOne")
     public ResponseEntity<CategoryDto> saveCategory(@RequestBody CategoryDto categoryDto) {
         return ResponseEntity.ok(categoryService.saveCategory(categoryDto));
+    }
+
+    @PostMapping("/createList")
+    public ResponseEntity<List<CategoryDto>> createCategoryList(@RequestBody List<CategoryDto> categoryDtoList) {
+        return ResponseEntity.ok(categoryService.saveCategoryList(categoryDtoList));
     }
 
     @PutMapping("/update")

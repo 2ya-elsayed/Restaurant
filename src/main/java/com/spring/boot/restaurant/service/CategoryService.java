@@ -29,6 +29,13 @@ public interface CategoryService {
     CategoryDto saveCategory(CategoryDto categoryDto);
 
     /**
+     * Save a list of new categories.
+     *
+     * @param categoryDtoList the list of category DTOs to save
+     * @return the list of saved category DTOs
+     */
+    List<CategoryDto> saveCategoryList(List<CategoryDto> categoryDtoList);
+    /**
      * Update an existing category.
      *
      * @param categoryDto the updated category data
