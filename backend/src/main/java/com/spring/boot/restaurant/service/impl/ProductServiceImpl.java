@@ -30,7 +30,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
 
     @Override
-    public List<ProductDto> getAllProducts() {
+    public List<ProductDto>     getAllProducts() {
         List<Product> products = productRepo.findAll();
         return productMapper.toDtoList(products);
     }
