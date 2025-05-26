@@ -1,5 +1,8 @@
 package com.spring.boot.restaurant.exception;
 
+import com.spring.boot.restaurant.dto.BundleMessage;
+import com.spring.boot.restaurant.service.bundleService.BundleTranslatorService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -13,39 +16,49 @@ import java.util.NoSuchElementException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private final BundleTranslatorService translatorService;
+
+    @Autowired
+    public GlobalExceptionHandler(BundleTranslatorService translatorService) {
+        this.translatorService = translatorService;
+    }
+
+    @ExceptionHandler(BaseException.class)
+    public ResponseEntity<BundleMessage> handleBaseExceptions(BaseException ex) {
+        return new ResponseEntity<>(ex.getBundleMessage(), HttpStatus.valueOf(ex.getStatusCode()));
+    }
+
     // Handle validation errors (@Valid)
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationErrors(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage())
-        );
-
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<BundleMessage> handleValidationErrors(MethodArgumentNotValidException ex) {
+        BundleMessage message = translatorService.getBundleMessage("validation.failed");
+        return new ResponseEntity<>(message, HttpStatus.BAD_REQUEST);
     }
+
 
     // Handle entity not found exceptions (e.g., findById().orElseThrow())
     @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<Map<String, String>> handleNoSuchElement(NoSuchElementException ex) {
-        Map<String, String> error = new HashMap<>();
-        error.put("error", ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    public ResponseEntity<BundleMessage> handleNoSuchElement(NoSuchElementException ex) {
+        BundleMessage message = translatorService.getBundleMessage("not.found");
+        return new ResponseEntity<>(message, HttpStatus.NOT_FOUND);
     }
 
     // Handle illegal states (e.g., double booking)
     @ExceptionHandler(IllegalStateException.class)
-    public ResponseEntity<Map<String, String>> handleIllegalState(IllegalStateException ex) {
-        Map<String, String> error = new HashMap<>();
-        error.put("error", ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    public ResponseEntity<BundleMessage> handleIllegalState(IllegalStateException ex) {
+        BundleMessage message = translatorService.getBundleMessage("illegal.state");
+        return new ResponseEntity<>(message, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<BundleMessage> handleBadRequest(BadRequestException ex) {
+        return new ResponseEntity<>(ex.getBundleMessage(), HttpStatus.BAD_REQUEST);
     }
 
     // Fallback for any unhandled exceptions
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleGeneralException(Exception ex) {
-        Map<String, String> error = new HashMap<>();
-        error.put("error", "Internal Server Error: " + ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<BundleMessage> handleGenericException(Exception ex) {
+        BundleMessage message = translatorService.getBundleMessage("internal.error");
+        return new ResponseEntity<>(message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

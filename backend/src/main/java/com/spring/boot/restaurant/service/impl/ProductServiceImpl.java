@@ -1,5 +1,6 @@
 package com.spring.boot.restaurant.service.impl;
 
+import com.spring.boot.restaurant.dto.BundleMessage;
 import com.spring.boot.restaurant.dto.ProductDto;
 import com.spring.boot.restaurant.exception.BadRequestException;
 import com.spring.boot.restaurant.exception.NotFoundException;
@@ -7,15 +8,12 @@ import com.spring.boot.restaurant.mapper.ProductMapper;
 import com.spring.boot.restaurant.model.Product;
 import com.spring.boot.restaurant.repository.ProductRepo;
 import com.spring.boot.restaurant.service.ProductService;
-import com.spring.boot.restaurant.utils.MessageUtil;
+import com.spring.boot.restaurant.service.bundleService.BundleTranslatorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +23,7 @@ public class ProductServiceImpl implements ProductService {
     private ProductRepo productRepo;
 
     @Autowired
-    private MessageSource messageSource;
+    private BundleTranslatorService bundleTranslatorService;
 
     private final ProductMapper productMapper;
 
@@ -39,15 +37,29 @@ public class ProductServiceImpl implements ProductService {
     public ProductDto getProductById(Long id) {
         return productRepo.findById(id)
                 .map(productMapper::toDto)
-                .orElse(null);
+                .orElseThrow(() -> {
+                    BundleMessage message = bundleTranslatorService.getBundleMessage("product.not.found");
+                    return new NotFoundException(message);
+                });
     }
 
     @Override
     public ProductDto saveProduct(ProductDto productDto) {
-        if (productDto.getName() == null || productDto.getName().isBlank()) {
-            Map<String, String> message = MessageUtil.getBilingualMessageMap(messageSource, "category.name.empty");
-            throw new BadRequestException(message.toString());
+        if (productDto == null || productDto.getName() == null || productDto.getName().isBlank()) {
+            BundleMessage message = bundleTranslatorService.getBundleMessage("product.name.invalid");
+            throw new BadRequestException(message);
         }
+
+        System.out.println("---> product name not null");
+
+        // Check for duplicate product name under same category
+        if (productRepo.existsByNameAndCategoryId(productDto.getName(), productDto.getCategoryId())) {
+            BundleMessage message = bundleTranslatorService.getBundleMessage("product.already.exists");
+            System.out.println("---> product name duplicate");
+            throw new BadRequestException(message);
+        }
+
+        System.out.println("---> product not duplicated ");
 
         Product product = productMapper.toEntity(productDto);
         return productMapper.toDto(productRepo.save(product));
@@ -56,22 +68,24 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductDto> saveProductList(List<ProductDto> productDtoList) {
         if (productDtoList == null || productDtoList.isEmpty()) {
-            throw new BadRequestException("Product list must not be null or empty");
+            BundleMessage message = bundleTranslatorService.getBundleMessage("product.list.empty");
+            throw new BadRequestException(message);
         }
 
         for (ProductDto dto : productDtoList) {
             if (dto.getName() == null || dto.getName().isBlank()) {
-                throw new BadRequestException("Product name is required.");
+                BundleMessage message = bundleTranslatorService.getBundleMessage("product.name.invalid");
+                throw new BadRequestException(message);
             }
         }
 
-        // Filter out duplicates based on name + category ID
         List<ProductDto> nonDuplicateDtos = productDtoList.stream()
                 .filter(dto -> !productRepo.existsByNameAndCategoryId(dto.getName(), dto.getCategoryId()))
                 .toList();
 
         if (nonDuplicateDtos.isEmpty()) {
-            throw new BadRequestException("All provided products are duplicates.");
+            BundleMessage message = bundleTranslatorService.getBundleMessage("product.all.duplicates");
+            throw new BadRequestException(message);
         }
 
         List<Product> products = productMapper.toEntityList(nonDuplicateDtos);
@@ -82,7 +96,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public boolean deleteProductById(Long id) {
         if (!productRepo.existsById(id)) {
-            return false;
+            BundleMessage message = bundleTranslatorService.getBundleMessage("product.not.found");
+            throw new NotFoundException(message);
         }
         productRepo.deleteById(id);
         return true;
@@ -90,8 +105,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDto updateProduct(ProductDto productDto) {
-        if (productDto.getId() == null || !productRepo.existsById(productDto.getId())) {
-            throw new NotFoundException("Product with ID " + productDto.getId() + " not found");
+        if (productDto == null || productDto.getId() == null || !productRepo.existsById(productDto.getId())) {
+            BundleMessage message = bundleTranslatorService.getBundleMessage("product.not.found");
+            throw new NotFoundException(message);
         }
 
         Product product = productMapper.toEntity(productDto);
@@ -120,10 +136,17 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public boolean deleteProductsByIds(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            BundleMessage message = bundleTranslatorService.getBundleMessage("product.id.list.empty");
+            throw new BadRequestException(message);
+        }
+
         List<Product> products = productRepo.findAllById(ids);
         if (products.isEmpty()) {
-            return false;
+            BundleMessage message = bundleTranslatorService.getBundleMessage("product.ids.not.found");
+            throw new NotFoundException(message);
         }
+
         productRepo.deleteAll(products);
         return true;
     }

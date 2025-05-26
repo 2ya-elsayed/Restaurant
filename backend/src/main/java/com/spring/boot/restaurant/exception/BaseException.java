@@ -1,17 +1,19 @@
 package com.spring.boot.restaurant.exception;
 
+import com.spring.boot.restaurant.dto.BundleMessage;
+
 public class BaseException extends RuntimeException {
-    private final String message;
+    private final BundleMessage bundleMessage;
     private final int statusCode;
 
-    public BaseException(String message, int statusCode) {
-        super(message);
-        this.message = message;
+    public BaseException(BundleMessage bundleMessage, int statusCode) {
+        super(bundleMessage.getMessageEn()); // this will be the default exception message
+        this.bundleMessage = bundleMessage;
         this.statusCode = statusCode;
     }
 
-    public String getMessage() {
-        return message;
+    public BundleMessage getBundleMessage() {
+        return bundleMessage;
     }
 
     public int getStatusCode() {

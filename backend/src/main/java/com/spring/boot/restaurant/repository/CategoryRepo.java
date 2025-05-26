@@ -13,4 +13,6 @@ public interface CategoryRepo extends JpaRepository<Category, Long> {
 
     // Search categories by name containing keyword (case insensitive)
     List<Category> findByNameContainingIgnoreCase(String name);
+
+    boolean existsByName(String name);
 }

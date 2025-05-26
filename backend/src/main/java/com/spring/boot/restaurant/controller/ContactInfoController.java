@@ -33,10 +33,10 @@ public class ContactInfoController {
         return ResponseEntity.ok(contactInfoService.saveContactInfo(dto));
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<ProductDto> updateProduct(@RequestBody ProductDto productDto) {
-        return ResponseEntity.ok(contactInfoService.updateProduct(productDto));
-    }
+//    @PutMapping("/update")
+//    public ResponseEntity<ProductDto> updateContactInfo(@RequestBody ProductDto productDto) {
+//        return ResponseEntity.ok(contactInfoService.updateContactInfo(productDto));
+//    }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteContactInfo(@PathVariable Long id) {
