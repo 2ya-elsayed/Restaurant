@@ -1,6 +1,7 @@
 package com.spring.boot.restaurant.service;
 
 import com.spring.boot.restaurant.dto.ProductDto;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -10,7 +11,7 @@ public interface ProductService {
      *
      * @return a list of all product DTOs
      */
-    List<ProductDto> getAllProducts();
+    Page<ProductDto> getAllProducts(int pageNumber, int pageSize);
 
     /**
      * Retrieve a product by its ID.
@@ -66,7 +67,7 @@ public interface ProductService {
      * @param categoryId the ID of the category
      * @return a list of product DTOs in the specified category
      */
-    List<ProductDto> getProductsByCategoryId(Long categoryId);
+    Page<ProductDto> getProductsByCategoryId(Long categoryId, int pageNumber, int pageSize);
 
     /**
      * Retrieve products by category name.
@@ -74,7 +75,7 @@ public interface ProductService {
      * @param categoryName the name of the category
      * @return a list of product DTOs in the specified category
      */
-    List<ProductDto> getProductsByCategoryName(String categoryName);
+    Page<ProductDto> getProductsByCategoryName(String categoryName, int pageNumber, int pageSize);
 
     /**
      * Search for products by name or description (full or partial match).
@@ -82,5 +83,5 @@ public interface ProductService {
      * @param keyword the keyword to search for
      * @return a list of matching product DTOs
      */
-    List<ProductDto> searchProducts(String keyword);
+    Page<ProductDto> searchProducts(String keyword, int pageNumber, int pageSize);
 }

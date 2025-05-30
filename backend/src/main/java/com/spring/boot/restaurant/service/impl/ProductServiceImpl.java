@@ -10,27 +10,26 @@ import com.spring.boot.restaurant.repository.ProductRepo;
 import com.spring.boot.restaurant.service.ProductService;
 import com.spring.boot.restaurant.service.bundleService.BundleTranslatorService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
-
-    @Autowired
-    private ProductRepo productRepo;
-
-    @Autowired
-    private BundleTranslatorService bundleTranslatorService;
-
+    private final ProductRepo productRepo;
+    private final BundleTranslatorService bundleTranslatorService;
     private final ProductMapper productMapper;
 
     @Override
-    public List<ProductDto>     getAllProducts() {
-        List<Product> products = productRepo.findAll();
-        return productMapper.toDtoList(products);
+    public Page<ProductDto> getAllProducts(int pageNumber, int pageSize) {
+        validatePagination(pageNumber, pageSize);
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        Page<Product> page = productRepo.findAllByOrderByIdAsc(pageable);
+        return page.map(productMapper::toDto);
     }
 
     @Override
@@ -115,23 +114,32 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductDto> getProductsByCategoryId(Long categoryId) {
-        List<Product> products = productRepo.findByCategoryId(categoryId);
-        return productMapper.toDtoList(products);
+    public Page<ProductDto> getProductsByCategoryId(Long categoryId, int pageNumber, int pageSize) {
+        validatePagination(pageNumber, pageSize);
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        Page<Product> page = productRepo.findByCategoryIdOrderByIdAsc(categoryId, pageable);
+        return page.map(productMapper::toDto);
     }
 
     @Override
-    public List<ProductDto> getProductsByCategoryName(String categoryName) {
-        List<Product> products = productRepo.findByCategoryName(categoryName);
-        return productMapper.toDtoList(products);
+    public Page<ProductDto> getProductsByCategoryName(String categoryName, int pageNumber, int pageSize) {
+        validatePagination(pageNumber, pageSize);
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        Page<Product> products = productRepo.findByCategoryNameOrderByIdAsc(categoryName, pageable);
+        return products.map(productMapper::toDto);
     }
 
     @Override
-    public List<ProductDto> searchProducts(String keyword) {
-        List<Product> products = productRepo
-                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(keyword, keyword);
-
-        return productMapper.toDtoList(products);
+    public Page<ProductDto> searchProducts(String keyword, int pageSize, int pageNumber) {
+        validatePagination(pageNumber, pageSize);
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        Page<Product> products = productRepo
+                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseOrderByIdAsc(
+                        keyword,
+                        keyword,
+                        pageable
+                );
+        return products.map(productMapper::toDto);
     }
 
     @Override
@@ -149,5 +157,11 @@ public class ProductServiceImpl implements ProductService {
 
         productRepo.deleteAll(products);
         return true;
+    }
+
+    private void validatePagination(int pageNumber, int pageSize) {
+        if (pageNumber < 1 || pageSize < 1) {
+            throw new IllegalArgumentException("Page number and size must be greater than 0");
+        }
     }
 }

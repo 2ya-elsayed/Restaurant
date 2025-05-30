@@ -1,8 +1,10 @@
 package com.spring.boot.restaurant.controller;
 
+import com.spring.boot.restaurant.dto.PageResponse;
 import com.spring.boot.restaurant.dto.ProductDto;
 import com.spring.boot.restaurant.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,8 +19,19 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping("/getAll")
-    public ResponseEntity<List<ProductDto>> getAllProducts() {
-        return ResponseEntity.ok(productService.getAllProducts());
+    public ResponseEntity<PageResponse<ProductDto>> getAllProducts(
+            @RequestParam(defaultValue = "1") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        Page<ProductDto> page = productService.getAllProducts(pageNumber, pageSize);
+        return ResponseEntity.ok(new PageResponse<>(
+                page.getContent(),
+                page.getTotalElements(),
+                page.getNumberOfElements(),
+                page.getNumber(),
+                page.getTotalPages(),
+                page.getSize()
+            )
+        );
     }
 
     @GetMapping("/getOne/{id}")
@@ -53,18 +66,55 @@ public class ProductController {
     }
 
     @GetMapping("/searchByCategoryId/{categoryId}")
-    public ResponseEntity<List<ProductDto>> getProductsByCategoryId(@PathVariable Long categoryId) {
-        return ResponseEntity.ok(productService.getProductsByCategoryId(categoryId));
+    public ResponseEntity<PageResponse<ProductDto>> getProductsByCategoryId(
+            @PathVariable Long categoryId,
+            @RequestParam(defaultValue = "1") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize) {
+        Page<ProductDto> page = productService.getProductsByCategoryId(categoryId, pageNumber, pageSize);
+        return ResponseEntity.ok(new PageResponse<>(
+                        page.getContent(),
+                        page.getTotalElements(),
+                        page.getNumberOfElements(),
+                        page.getNumber(),
+                        page.getTotalPages(),
+                        page.getSize()
+                )
+        );
     }
 
     @GetMapping("/searchByCategoryName/{categoryName}")
-    public ResponseEntity<List<ProductDto>> getProductsByCategoryName(@PathVariable String categoryName) {
-        return ResponseEntity.ok(productService.getProductsByCategoryName(categoryName));
+    public ResponseEntity<PageResponse<ProductDto>> getProductsByCategoryName(
+            @PathVariable String categoryName,
+            @RequestParam(defaultValue = "1") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize
+    ) {
+        Page<ProductDto> page = productService.getProductsByCategoryName(categoryName, pageNumber, pageSize);
+        return ResponseEntity.ok(new PageResponse<>(
+                        page.getContent(),
+                        page.getTotalElements(),
+                        page.getNumberOfElements(),
+                        page.getNumber(),
+                        page.getTotalPages(),
+                        page.getSize()
+                )
+        );
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ProductDto>> searchProducts(@RequestParam String keyword) {
-        List<ProductDto> result = productService.searchProducts(keyword);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<PageResponse<ProductDto>> searchProducts(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "1") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize
+    ) {
+        Page<ProductDto> page = productService.searchProducts(keyword, pageNumber, pageSize);
+        return ResponseEntity.ok(new PageResponse<>(
+                        page.getContent(),
+                        page.getTotalElements(),
+                        page.getNumberOfElements(),
+                        page.getNumber(),
+                        page.getTotalPages(),
+                        page.getSize()
+                )
+        );
     }
 }
