@@ -8,6 +8,8 @@ import java.util.List;
 
 @Repository
 public interface CategoryRepo extends JpaRepository<Category, Long> {
+    List<Category> findAllByOrderByIdAsc();
+
     // Find categories by exact name
     List<Category> findByName(String name);
 

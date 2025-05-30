@@ -30,7 +30,7 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDto> getAllCategories() {
-        List<Category> categories = categoryRepo.findAll();
+        List<Category> categories = categoryRepo.findAllByOrderByIdAsc();
         return categoryMapper.toDtoList(categories);
     }
 
