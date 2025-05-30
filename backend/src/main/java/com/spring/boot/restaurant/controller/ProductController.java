@@ -117,4 +117,23 @@ public class ProductController {
                 )
         );
     }
+
+    @GetMapping("/searchByKeywordAndCategoryId")
+    public ResponseEntity<PageResponse<ProductDto>> searchProductsByKeywordAndCategoryId(
+            @RequestParam String keyword,
+            @RequestParam Long categoryId,
+            @RequestParam(defaultValue = "1") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize
+    ) {
+        Page<ProductDto> page = productService.searchByKeywordAndCategory(keyword, categoryId, pageNumber, pageSize);
+        return ResponseEntity.ok(new PageResponse<>(
+                        page.getContent(),
+                        page.getTotalElements(),
+                        page.getNumberOfElements(),
+                        page.getNumber(),
+                        page.getTotalPages(),
+                        page.getSize()
+                )
+        );
+    }
 }

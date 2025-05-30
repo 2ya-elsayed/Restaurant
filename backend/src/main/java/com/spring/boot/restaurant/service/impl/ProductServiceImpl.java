@@ -143,6 +143,19 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public Page<ProductDto> searchByKeywordAndCategory(String keyword, Long categoryId, int pageSize, int pageNumber) {
+        validatePagination(pageNumber, pageSize);
+        Pageable pageable = PageRequest.of(pageNumber - 1, pageSize);
+        Page<Product> products = productRepo
+                .searchByKeywordAndCategory(
+                        keyword,
+                        categoryId,
+                        pageable
+                );
+        return products.map(productMapper::toDto);
+    }
+
+    @Override
     public boolean deleteProductsByIds(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             BundleMessage message = bundleTranslatorService.getBundleMessage("product.id.list.empty");

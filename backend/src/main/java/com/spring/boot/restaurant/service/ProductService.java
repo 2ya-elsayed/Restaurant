@@ -84,4 +84,6 @@ public interface ProductService {
      * @return a list of matching product DTOs
      */
     Page<ProductDto> searchProducts(String keyword, int pageNumber, int pageSize);
+
+    Page<ProductDto> searchByKeywordAndCategory(String keyword ,Long categoryId, int pageNumber, int pageSize);
 }
